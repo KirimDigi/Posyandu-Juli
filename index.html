@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Posyandu Juli</title>
+    <meta name="description" content="Halaman Informasi Kegiatan Posyandu Bulan Juli. Tampilan responsif dan mudah dibaca di mobile maupun PC.">
+    
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS Variables */
+        :root {
+            --bg-color: #0f172a;
+            --card-border: rgba(255, 255, 255, 0.1);
+            --control-bg: rgba(15, 23, 42, 0.75);
+            --control-hover: rgba(255, 255, 255, 0.1);
+            --text-color: #f8fafc;
+            --accent-color: #38bdf8;
+        }
+
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Ambient Blur Background */
+        .ambient-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('Posyandu.png');
+            background-size: cover;
+            background-position: center;
+            filter: blur(50px) brightness(0.35) saturate(1.2);
+            transform: scale(1.15); /* Avoid white bleed from filter */
+            z-index: 1;
+            pointer-events: none;
+            transition: filter 0.5s ease;
+        }
+
+        /* Scroll mode adjustments for body */
+        body.scroll-mode {
+            overflow-y: auto;
+            overflow-x: hidden;
+            align-items: flex-start;
+        }
+
+        /* Container */
+        .image-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        body.scroll-mode .image-container {
+            height: auto;
+            min-height: 100%;
+            padding: 24px 16px 120px 16px; /* Extra padding bottom for controls */
+        }
+
+        /* The main responsive image */
+        .responsive-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--card-border);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+            cursor: zoom-in;
+        }
+
+        /* When zoomed in/scroll mode is on */
+        body.scroll-mode .responsive-img {
+            max-height: none;
+            width: 100%;
+            max-width: 720px; /* Optimal reading width on large screens */
+            cursor: zoom-out;
+        }
+
+        @media (hover: hover) {
+            .responsive-img:hover {
+                transform: scale(1.005);
+                box-shadow: 0 30px 60px -10px rgba(0, 0, 0, 0.8), 0 0 15px rgba(56, 189, 248, 0.15);
+            }
+        }
+
+        /* Floating controls bar */
+        .controls {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--control-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            padding: 8px 16px;
+            border-radius: 9999px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            z-index: 10;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transform: translate(-50%, 20px);
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+        }
+
+        .btn-control {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        .btn-control:hover {
+            background: var(--control-hover);
+            color: var(--text-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-control:active {
+            transform: translateY(0);
+        }
+
+        .btn-control svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Tooltip style */
+        .btn-control::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 135%;
+            left: 50%;
+            transform: translateX(-50%) scale(0.85);
+            background: rgba(15, 23, 42, 0.95);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-control:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+
+        /* Divider inside controls */
+        .divider {
+            width: 1px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Keyframes */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translate(-50%, 20px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+
+        /* Responsiveness overrides */
+        @media (max-width: 640px) {
+            .image-container {
+                padding: 8px;
+            }
+            
+            body.scroll-mode .image-container {
+                padding: 16px 8px 100px 8px;
+            }
+
+            .responsive-img {
+                border-radius: 12px;
+            }
+
+            .controls {
+                bottom: 16px;
+                gap: 12px;
+                padding: 6px 12px;
+            }
+
+            .btn-control {
+                padding: 6px;
+            }
+
+            .btn-control svg {
+                width: 18px;
+                height: 18px;
+            }
+
+            /* Disable tooltip on mobile */
+            .btn-control::after {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Blur Background -->
+    <div class="ambient-bg" id="ambientBg"></div>
+
+    <!-- Main Content Container -->
+    <main class="image-container" id="container">
+        <img src="Posyandu.png" alt="Posyandu Juli" class="responsive-img" id="mainImage" title="Klik untuk memperbesar / memperkecil">
+    </main>
+
+    <!-- Floating Action Controls -->
+    <nav class="controls" aria-label="Kontrol Gambar">
+        <!-- Fit / Scroll View Toggle -->
+        <button class="btn-control" id="btnZoom" data-tooltip="Fit / Scroll Layar" aria-label="Ubah Tampilan Layar">
+            <!-- Icon Fit View (initial) -->
+            <svg id="iconFit" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75v4.5m0-4.5h-4.5m4.5 0L15 9m5.25 11.25v-4.5m0 4.5h-4.5m4.5 0L15 15" />
+            </svg>
+            <!-- Icon Scroll View (hidden initially) -->
+            <svg id="iconScroll" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="display: none;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9V4.5M15 9h4.5M15 9l5.25-5.25M15 15v4.5M15 15h4.5m-4.5 0 5.25 5.25" />
+            </svg>
+        </button>
+
+        <div class="divider"></div>
+
+        <!-- Fullscreen API Toggle -->
+        <button class="btn-control" id="btnFullscreen" data-tooltip="Layar Penuh" aria-label="Layar Penuh">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
+            </svg>
+        </button>
+
+        <div class="divider"></div>
+
+        <!-- Download Image Button -->
+        <button class="btn-control" id="btnDownload" data-tooltip="Unduh Gambar" aria-label="Unduh Gambar">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+        </button>
+    </nav>
+
+    <script>
+        const body = document.body;
+        const mainImage = document.getElementById('mainImage');
+        const btnZoom = document.getElementById('btnZoom');
+        const btnFullscreen = document.getElementById('btnFullscreen');
+        const btnDownload = document.getElementById('btnDownload');
+        const iconFit = document.getElementById('iconFit');
+        const iconScroll = document.getElementById('iconScroll');
+
+        // Toggle Zoom Function (Fit Screen vs Full-Width Scroll)
+        function toggleZoom() {
+            body.classList.toggle('scroll-mode');
+            const isScrollMode = body.classList.contains('scroll-mode');
+            
+            if (isScrollMode) {
+                iconFit.style.display = 'none';
+                iconScroll.style.display = 'block';
+                btnZoom.setAttribute('data-tooltip', 'Fit Layar');
+            } else {
+                iconFit.style.display = 'block';
+                iconScroll.style.display = 'none';
+                btnZoom.setAttribute('data-tooltip', 'Scroll Layar');
+                // Scroll back to top when resetting
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // Event Listeners for Zooming
+        btnZoom.addEventListener('click', toggleZoom);
+        mainImage.addEventListener('click', toggleZoom);
+
+        // Toggle Fullscreen API
+        btnFullscreen.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`Gagal masuk ke mode layar penuh: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        // Download Image Functionality
+        btnDownload.addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.href = 'Posyandu.png';
+            link.download = 'Posyandu_Juli.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    </script>
+</body>
+</html>
